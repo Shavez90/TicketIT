@@ -71,7 +71,7 @@ return mapToDto(savedTicket);
         if (!ticket.getAssignedTo().equals(agentEmail)) {
             throw new RuntimeException("Wrong agent this ticket is assigned to another agent");
         }
-        if (isValidTransition(ticket.getStatus(),newStatus)){
+        if (!isValidTransition(ticket.getStatus(),newStatus)){
             throw new RuntimeException();
         }
 
