@@ -75,6 +75,9 @@ return mapToDto(savedTicket);
             throw new RuntimeException();
         }
 
+        ticket.setStatus(newStatus);           // ✅ ADD THIS - Actually update status
+        ticket.setUpdatedAt(LocalDateTime.now());  // ✅ ADD THIS - Update timestamp
+
  Ticket savedTicket = ticketRepository.save(ticket);
         return  mapToDto(savedTicket);
 
@@ -115,9 +118,6 @@ if (  currentStatus ==TicketStatus.OPEN){
                 .build();
 
     }
-
-
-
 }
 /*
 public TicketResponseDTO create(String userId,  TicketRequestDTO request) {
