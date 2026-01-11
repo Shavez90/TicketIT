@@ -95,8 +95,8 @@ if (  currentStatus ==TicketStatus.OPEN){
             return newStatus == TicketStatus.RESOLVED;
 
         }
-        if (  currentStatus ==TicketStatus.RESOLVED){
-            return newStatus == TicketStatus.CLOSED;
+        if (  currentStatus.equals(TicketStatus.RESOLVED)){
+            return newStatus.equals(TicketStatus.CLOSED);
 
         }
         // start thinking from here
