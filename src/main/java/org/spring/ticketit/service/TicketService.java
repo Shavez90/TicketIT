@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.spring.ticketit.dto.TicketRequestDTO;
 import org.spring.ticketit.dto.TicketResponseDTO;
 import org.spring.ticketit.enums.TicketStatus;
+import org.spring.ticketit.exceptions.InvalidTicketStatusException;
+import org.spring.ticketit.exceptions.TicketNotFoundException;
 import org.spring.ticketit.exceptions.UserNotFoundException;
 import org.spring.ticketit.model.Ticket;
 
@@ -49,11 +51,11 @@ return mapToDto(savedTicket);
                 .toList();
     }
     public TicketResponseDTO assignTicketToSelf(String ticketId, String agentEmail){
-          Ticket ticket= ticketRepository.findById(ticketId).orElseThrow(() -> new RuntimeException("Ticket not found"));
+          Ticket ticket= ticketRepository.findById(ticketId).orElseThrow(() -> new TicketNotFoundException("Ticket not found"));
           if (ticket.getAssignedTo() !=null){
-              throw new RuntimeException("Already Assigned");
+              throw new InvalidTicketStatusException("Already Assigned");
           }if (ticket.getStatus() != TicketStatus.OPEN) {  // ✅ ADD THIS
-            throw new RuntimeException("Can only assign OPEN tickets");
+            throw new InvalidTicketStatusException("Can only assign OPEN tickets");
         }
               ticket.setAssignedTo(agentEmail);
               ticket.setUpdatedAt(LocalDateTime.now());

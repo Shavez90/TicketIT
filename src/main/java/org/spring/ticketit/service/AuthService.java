@@ -2,6 +2,7 @@ package org.spring.ticketit.service;
 
 import lombok.RequiredArgsConstructor;
 import org.spring.ticketit.dto.RegisterRequestDTO;
+import org.spring.ticketit.exceptions.UserAlreadyExistsException;
 import org.spring.ticketit.model.User;
 import org.spring.ticketit.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +17,7 @@ public class AuthService {
 
         public void register(RegisterRequestDTO request) {
 if(userRepository.findByEmail(request.getEmail()).isPresent()){
-    throw new RuntimeException("User already exist");
+    throw new UserAlreadyExistsException("User already exist");
 }
 String password = passwordEncoder.encode(request.getPassword());
 User user = User.builder().email(request.getEmail())
