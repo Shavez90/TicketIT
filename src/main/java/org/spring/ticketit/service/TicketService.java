@@ -6,6 +6,7 @@ import org.spring.ticketit.dto.TicketRequestDTO;
 import org.spring.ticketit.dto.TicketResponseDTO;
 import org.spring.ticketit.enums.TicketStatus;
 import org.spring.ticketit.exceptions.InvalidTicketStatusException;
+import org.spring.ticketit.exceptions.TicketAlreadyAssignedException;
 import org.spring.ticketit.exceptions.TicketNotFoundException;
 import org.spring.ticketit.exceptions.UserNotFoundException;
 import org.spring.ticketit.model.Ticket;
@@ -53,7 +54,7 @@ return mapToDto(savedTicket);
     public TicketResponseDTO assignTicketToSelf(String ticketId, String agentEmail){
           Ticket ticket= ticketRepository.findById(ticketId).orElseThrow(() -> new TicketNotFoundException("Ticket not found"));
           if (ticket.getAssignedTo() !=null){
-              throw new InvalidTicketStatusException("Already Assigned");
+              throw new TicketAlreadyAssignedException("Already Assigned");
           }if (ticket.getStatus() != TicketStatus.OPEN) {  // ✅ ADD THIS
             throw new InvalidTicketStatusException("Can only assign OPEN tickets");
         }

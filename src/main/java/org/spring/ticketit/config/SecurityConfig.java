@@ -47,8 +47,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
                             // 🧑‍💼 AGENT / ADMIN endpoints
                             .requestMatchers(HttpMethod.GET, "/api/tickets").hasAnyRole("AGENT", "ADMIN")
-                            .requestMatchers(HttpMethod.PUT, "/api/tickets/**/assign").hasAnyRole("AGENT", "ADMIN")
-                            .requestMatchers(HttpMethod.PUT, "/api/tickets/**/status").hasAnyRole("AGENT", "ADMIN")
+                            .requestMatchers(HttpMethod.PUT, "/api/tickets/*/assign").hasAnyRole("AGENT", "ADMIN")
+                            .requestMatchers(HttpMethod.PUT, "/api/tickets/*/status").hasAnyRole("AGENT", "ADMIN")
 
                             // 🔐 Everything else
                             .anyRequest().authenticated()
