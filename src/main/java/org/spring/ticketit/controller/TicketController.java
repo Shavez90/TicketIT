@@ -46,5 +46,13 @@ return  ticketService.changeStatus(
         return ticketService.getAllTickets();
     }
 
+    @PutMapping("/{ticketId}/assign")
+    public TicketResponseDTO assignToSelf(
+            @PathVariable String ticketId,
+            Authentication authentication) {
+        String agentEmail = authentication.getName();
+        return ticketService.assignTicketToSelf(ticketId, agentEmail);
+    }
+
 
 }

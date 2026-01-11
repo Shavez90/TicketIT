@@ -15,7 +15,7 @@ public class AuthService {
 
 
         public void register(RegisterRequestDTO request) {
-if(userRepository.findByEmail(request.getEmail()).isPresent()) {
+if(userRepository.findByEmail(request.getEmail()).isPresent()){
     throw new RuntimeException("User already exist");
 }
 String password = passwordEncoder.encode(request.getPassword());

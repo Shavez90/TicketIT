@@ -52,12 +52,16 @@ return mapToDto(savedTicket);
           Ticket ticket= ticketRepository.findById(ticketId).orElseThrow(() -> new RuntimeException("Ticket not found"));
           if (ticket.getAssignedTo() !=null){
               throw new RuntimeException("Already Assigned");
-          }else {
+          }if (ticket.getStatus() != TicketStatus.OPEN) {  // ✅ ADD THIS
+            throw new RuntimeException("Can only assign OPEN tickets");
+        }
               ticket.setAssignedTo(agentEmail);
               ticket.setUpdatedAt(LocalDateTime.now());
               Ticket AssignedTicket = ticketRepository.save(ticket);
+              ticket.setStatus(TicketStatus.IN_PROGRESS);  // ✅ ADD THIS
+
               return mapToDto(AssignedTicket);
-    }
+
 
     }
 
@@ -72,7 +76,7 @@ return mapToDto(savedTicket);
             throw new RuntimeException("Wrong agent this ticket is assigned to another agent");
         }
         if (!isValidTransition(ticket.getStatus(),newStatus)){
-            throw new RuntimeException();
+            throw new RuntimeException("INVALID TRANSITION");
         }
 
         ticket.setStatus(newStatus);           // ✅ ADD THIS - Actually update status
@@ -87,12 +91,12 @@ return mapToDto(savedTicket);
     /// ///////////////////Validation////////////////////////
 
     private boolean isValidTransition(TicketStatus currentStatus, TicketStatus newStatus) {
-if (  currentStatus ==TicketStatus.OPEN){
-     return newStatus == TicketStatus.IN_PROGRESS;
+if (  currentStatus.equals(TicketStatus.OPEN)){
+     return newStatus.equals( TicketStatus.IN_PROGRESS);
 
 }
-        if (  currentStatus ==TicketStatus.IN_PROGRESS){
-            return newStatus == TicketStatus.RESOLVED;
+        if (  currentStatus.equals(TicketStatus.IN_PROGRESS)){
+            return newStatus.equals(TicketStatus.RESOLVED) ;
 
         }
         if (  currentStatus.equals(TicketStatus.RESOLVED)){
