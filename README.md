@@ -1,5 +1,5 @@
 # TicketIT - Minimal README
-
+[![Build Status](https://github.com/Shavez90/TicketIT/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Shavez90/TicketIT/actions)
 A lightweight ticketing/helpdesk REST API built with Spring Boot & JWT authentication.
 
 ---
