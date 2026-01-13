@@ -13,7 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
-    private final UserDetailsService userDetailsService;
+
     private final JwtService jwtService;
     private final AuthService authService;
 
