@@ -70,7 +70,7 @@ return mapToDto(savedTicket);
 
     public TicketResponseDTO changeStatus(String ticketId, TicketStatus newStatus, String agentEmail) {
         Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(() -> new TicketNotFoundException("Ticket not found"));
-        System.out.println("CONTROLLER HIT");
+        System.out.println("changeStatus controller hit!");
 
 
         if (ticket.getAssignedTo() == null) {
@@ -81,7 +81,7 @@ return mapToDto(savedTicket);
             throw new RuntimeException("Wrong agent this ticket is assigned to another agent");
         }
         if (!isValidTransition(ticket.getStatus(),newStatus)){
-            throw new RuntimeException("INVALID TRANSITION");
+            throw new InvalidTicketStatusException("INVALID TRANSITION");
         }
 
         ticket.setStatus(newStatus);           // ✅ ADD THIS - Actually update status

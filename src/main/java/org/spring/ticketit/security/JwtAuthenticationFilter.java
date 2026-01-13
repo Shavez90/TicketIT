@@ -6,16 +6,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority; // ADDED: For JWT authorities
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
 import java.io.IOException;
-
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -41,15 +41,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt = authHeader.substring(7);
         final String username = jwtService.extractUsername(jwt);
 
+        // Proceed if username is present and not already authenticated
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             if (jwtService.isTokenValid(jwt, userDetails)) {
+
+                // 🟢 ADDED: Extract the user's role from the JWT "role" claim
+                String role = jwtService.extractClaim(jwt, claims -> claims.get("role", String.class));
+
+                // 🟢 ADDED: Wrap the role as a GrantedAuthority (Spring expects this format)
+                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+
+                // 🟢 CHANGED: Use the above authorities (from JWT),
+                // NOT userDetails.getAuthorities() from the DB
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
-                        userDetails.getAuthorities()
+                        authorities           // Now authorities match JWT "role"!
                 );
+
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
@@ -60,12 +71,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 }
 
 /*
-EXECUTION FLOW:
-1. Extract "Bearer <token>" from Authorization header
-2. Extract username from JWT payload
-3. Load UserDetails from database
-4. Validate token (signature + expiration check)
-5. If valid → Set authentication in SecurityContext
-6. Continue to controller
+-------------------------------
+🟢 WHAT HAS BEEN ADDED/CHANGED?
+-------------------------------
+- Extract the "role" claim from the JWT payload (e.g., "ROLE_AGENT").
+- Build a Spring authority list from that claim (List<SimpleGrantedAuthority>).
+- Inject the authority list into the Authentication *instead of* relying solely on whatever is in your database's UserDetails object.
 
- */
+-------------------------------
+🟢 WHY IS THIS NEEDED?
+-------------------------------
+- Spring Security enforces roles/permissions for @PreAuthorize and endpoint rules
+  *only* by looking at the authorities list on the Authentication found in the SecurityContext.
+- By putting the role from the JWT directly into authorities, your API respects the user's actual login role (even if your DB is out-of-sync).
+- Fixes problems where you kept getting 403 Forbidden responses even though your JWT
+  had "ROLE_AGENT"—now @PreAuthorize("hasAnyRole('AGENT','ADMIN')") will work!
+
+-------------------------------
+🟢 TL;DR (What to do)
+-------------------------------
+- Add the 2 marked lines and change the argument.
+- Your JWT-based role authorization will start working for AGENT/ADMIN protected endpoints.
+*/
