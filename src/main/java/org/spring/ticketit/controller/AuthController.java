@@ -58,7 +58,7 @@ public class AuthController {
 
         String token = jwtService.generateToken(userDetails);
 
-        // 6️⃣ Return identity-focused response
+        // 6️⃣ Return identity-focused responses
         return ResponseEntity.ok(
                 new LoginResponse(token, email, role)
         );
