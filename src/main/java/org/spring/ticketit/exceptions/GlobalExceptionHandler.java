@@ -1,21 +1,20 @@
 package org.spring.ticketit.exceptions;
 
+import org.spring.ticketit.exceptions.UserAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.naming.AuthenticationException;
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    // ================= USER / BUSINESS ERRORS =================
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<Map<String, String>> handleUserAlreadyExists(
@@ -42,65 +41,76 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", ex.getMessage()));
     }
-
-    // ================= VALIDATION ERRORS =================
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(
-            MethodArgumentNotValidException ex) {
-
-        Map<String, String> errors = new HashMap<>();
-
-        ex.getBindingResult()
-                .getFieldErrors()
-                .forEach(err ->
-                        errors.put(err.getField(), err.getDefaultMessage())
-                );
+    @ExceptionHandler(DuplicatTicketException.class)
+    public ResponseEntity<Map<String, String>> handleTicketAlreadyCreated(
+            DuplicatTicketException ex) {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(errors);
+                .body(Map.of("error", ex.getMessage()));
     }
 
-    // ================= AUTHENTICATION ERRORS =================
 
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Map<String, String>> handleBadCredentials(
-            BadCredentialsException ex) {
+// ================= VALIDATION ERRORS =================
 
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", "Invalid email or password"));
-    }
+@ExceptionHandler(MethodArgumentNotValidException.class)
+public ResponseEntity<Map<String, String>> handleValidationErrors(
+        MethodArgumentNotValidException ex) {
 
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<Map<String, String>> handleAuthenticationException(
-            AuthenticationException ex) {
+    Map<String, String> errors = new HashMap<>();
 
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", "Authentication failed"));
-    }
+    ex.getBindingResult()
+            .getFieldErrors()
+            .forEach(err ->
+                    errors.put(err.getField(), err.getDefaultMessage())
+            );
 
-    // ================= AUTHORIZATION ERRORS =================
+    return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(errors);
+}
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, String>> handleAccessDenied(
-            AccessDeniedException ex) {
+// ================= AUTHENTICATION ERRORS =================
 
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(Map.of("error", "Access denied"));
-    }
+@ExceptionHandler(BadCredentialsException.class)
+public ResponseEntity<Map<String, String>> handleBadCredentials(
+        BadCredentialsException ex) {
 
-    // ================= FALLBACK (LAST) =================
+    return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
+            .body(Map.of("error", "Invalid email or password"));
+}
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGenericException(
-            Exception ex) {
+@ExceptionHandler(AuthenticationException.class)
+public ResponseEntity<Map<String, String>> handleAuthenticationException(
+        AuthenticationException ex) {
 
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Something went wrong"));
-    }
+    return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
+            .body(Map.of("error", "Authentication failed"));
+}
+
+// ================= AUTHORIZATION ERRORS =================
+
+@ExceptionHandler(AccessDeniedException.class)
+public ResponseEntity<Map<String, String>> handleAccessDenied(
+        AccessDeniedException ex) {
+
+    return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
+            .body(Map.of("error", "Access denied"));
+}
+
+// ================= FALLBACK (LAST) =================
+
+@ExceptionHandler(Exception.class)
+public ResponseEntity<Map<String, String>> handleGenericException(
+        Exception ex) {
+
+    return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Map.of("error", "Something went wrong = GL"));
+}
+
+
 }

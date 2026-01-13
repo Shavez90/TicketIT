@@ -5,10 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.spring.ticketit.dto.TicketRequestDTO;
 import org.spring.ticketit.dto.TicketResponseDTO;
 import org.spring.ticketit.enums.TicketStatus;
-import org.spring.ticketit.exceptions.InvalidTicketStatusException;
-import org.spring.ticketit.exceptions.TicketAlreadyAssignedException;
-import org.spring.ticketit.exceptions.TicketNotFoundException;
-import org.spring.ticketit.exceptions.UserNotFoundException;
+import org.spring.ticketit.exceptions.*;
 import org.spring.ticketit.model.Ticket;
 
 import org.spring.ticketit.repository.TicketRepository;
@@ -26,6 +23,9 @@ public class TicketService {
     public TicketResponseDTO createTicket(TicketRequestDTO request, String userEmail){
           userRepository.findByEmail(userEmail).orElseThrow(
                 () -> new UserNotFoundException("User not found"));
+       if (ticketRepository.existsByTitle(request.getTitle())){
+               throw  new DuplicatTicketException("Ticket already exist");
+       }
         Ticket ticket = Ticket.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
@@ -69,7 +69,9 @@ return mapToDto(savedTicket);
     }
 
     public TicketResponseDTO changeStatus(String ticketId, TicketStatus newStatus, String agentEmail) {
-        Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(() -> new RuntimeException("Ticket not found"));
+        Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(() -> new TicketNotFoundException("Ticket not found"));
+        System.out.println("CONTROLLER HIT");
+
 
         if (ticket.getAssignedTo() == null) {
             throw new RuntimeException("This ticket not assigned yet");
